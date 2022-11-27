@@ -3,7 +3,7 @@ use serde::{Deserialize, Deserializer};
 use std::str::FromStr;
 
 use crate::{
-    error::RequestError,
+    error::HttpError,
     models::{MongoFilter, MongoOptionalFilter},
 };
 
@@ -29,7 +29,7 @@ impl<'de> Deserialize<'de> for UserId {
 }
 
 impl MongoFilter for UserId {
-    type Error = RequestError;
+    type Error = HttpError;
 
     fn mongo_filter(&self) -> Result<Document, Self::Error> {
         match self {

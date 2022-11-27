@@ -1,5 +1,3 @@
+
 [workspace]
-members = [
-    "axum-api-rs",
-    "tools/*",
-]
+members = ["axum-api-rs", "tools/*"]

@@ -1,23 +1,26 @@
 use axum::{
-    extract::{Extension, Path, Query},
-    handler::Handler,
-    http::StatusCode,
+    extract::{Path, State},
     response::{IntoResponse, Json},
-    Router,
 };
-use mongodb::Database;
+use mongodb::bson::Document;
 
 use crate::{
-    models::User,
-    schemas::{self, fields::UserId},
+    models::{MongoCollection, MongoFilter, User},
+    schemas::fields::UserId,
+    AppStateType, HttpResult,
 };
 
-pub fn get_user(
-    Path(user_id): Path<UserId>,
-    Extension(db): Extension<Database>,
-) -> impl IntoResponse {
+pub async fn get_user(
+    Path(id_or_email): Path<UserId>,
+    State(state): AppStateType,
+) -> HttpResult<impl IntoResponse> {
+    let col = User::collection::<Document>(&state.db);
 
+    let user = col.find_one(id_or_email.mongo_filter()?, None).await?;
 
-    db.
-    (StatusCode::OK, "OK")
+    Ok(Json(user))
+}
+
+pub async fn get_users() -> HttpResult<impl IntoResponse> {
+    Ok("hello")
 }

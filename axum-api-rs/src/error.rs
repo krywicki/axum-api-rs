@@ -7,25 +7,25 @@ use serde_json::{json, Value};
 use std::{borrow::Cow, error::Error, fmt};
 
 #[derive(Debug)]
-pub struct RequestError {
+pub struct HttpError {
     pub status: StatusCode,
     pub message: String,
     pub detail: Option<serde_json::Value>,
 }
 
-impl RequestError {
-    pub fn builder() -> RequestErrorBuilder {
-        RequestErrorBuilder::default()
+impl HttpError {
+    pub fn builder() -> HttpErrorBuilder {
+        HttpErrorBuilder::default()
     }
 }
 
-pub struct RequestErrorBuilder {
+pub struct HttpErrorBuilder {
     status: StatusCode,
     message: String,
     detail: Option<serde_json::Value>,
 }
 
-impl Default for RequestErrorBuilder {
+impl Default for HttpErrorBuilder {
     fn default() -> Self {
         Self {
             status: StatusCode::BAD_REQUEST,
@@ -35,7 +35,7 @@ impl Default for RequestErrorBuilder {
     }
 }
 
-impl RequestErrorBuilder {
+impl HttpErrorBuilder {
     pub fn status(mut self, status: StatusCode) -> Self {
         self.status = status;
         self
@@ -54,8 +54,8 @@ impl RequestErrorBuilder {
         self
     }
 
-    pub fn build(self) -> RequestError {
-        RequestError {
+    pub fn build(self) -> HttpError {
+        HttpError {
             status: self.status,
             message: self.message,
             detail: self.detail,
@@ -63,9 +63,9 @@ impl RequestErrorBuilder {
     }
 }
 
-impl Error for RequestError {}
+impl Error for HttpError {}
 
-impl fmt::Display for RequestError {
+impl fmt::Display for HttpError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let json = json!({
             "status": self.status.as_u16().to_string(),
@@ -77,8 +77,8 @@ impl fmt::Display for RequestError {
     }
 }
 
-impl From<mongodb::error::Error> for RequestError {
-    fn from(error: mongodb::error::Error) -> Self {
+impl From<mongodb::error::Error> for HttpError {
+    fn from(_: mongodb::error::Error) -> Self {
         Self {
             status: StatusCode::INTERNAL_SERVER_ERROR,
             message: StatusCode::INTERNAL_SERVER_ERROR.to_string(),
@@ -87,7 +87,7 @@ impl From<mongodb::error::Error> for RequestError {
     }
 }
 
-impl IntoResponse for RequestError {
+impl IntoResponse for HttpError {
     fn into_response(self) -> Response {
         let content = json!({
             "message": self.message,
