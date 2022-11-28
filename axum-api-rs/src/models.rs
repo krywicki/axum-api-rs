@@ -1,35 +1,32 @@
-use mongodb::bson;
-use mongodb::bson::oid::ObjectId;
-use mongodb::{Collection, Database};
+use mongodb::{
+    bson::{self, oid::ObjectId},
+    Collection, Database,
+};
 use serde::{Deserialize, Serialize, Serializer};
 
-#[derive(Serialize)]
-pub struct DocumentOut<T: Serialize> {
-    #[serde(rename="_id", serialize=)]
+/// Document wrapper to have bson _id serialize out to 'id'
+/// hex string
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Doc<T: Serialize> {
+    #[serde(rename(serialize = "id"), serialize_with = "object_id_ser")]
     _id: ObjectId,
-    #[serde(rename = "_id")]
-    content: T,
+    #[serde(flatten)]
+    body: T,
 }
 
-fn object_id_ser<S, T>(val: &T, serializer: S) -> Result<S::Ok, S::Error>
+/// Serialize object id as str instead of structure
+fn object_id_ser<S>(val: &ObjectId, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
-    T: ToString,
 {
-    serializer.serialize_str(&val.to_string().as_str())
+    serializer.serialize_str(val.to_hex().as_str())
 }
 
-fn object_id_de<'de, D>(deserializer: D) -> Result<T, D::Error>
-where
-    D: Deserializer<'de>,
-{
-}
-#[derive(Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct User {
     pub first_name: String,
     pub last_name: String,
     pub email: String,
-    pub id: String,
 }
 
 impl MongoCollection for User {

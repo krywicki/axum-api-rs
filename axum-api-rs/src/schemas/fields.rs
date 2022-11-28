@@ -7,6 +7,7 @@ use crate::{
     models::{MongoFilter, MongoOptionalFilter},
 };
 
+#[derive(Debug)]
 pub enum UserId {
     Email(String),
     Id(ObjectId),

@@ -78,7 +78,8 @@ impl fmt::Display for HttpError {
 }
 
 impl From<mongodb::error::Error> for HttpError {
-    fn from(_: mongodb::error::Error) -> Self {
+    fn from(err: mongodb::error::Error) -> Self {
+        println!("{}", err);
         Self {
             status: StatusCode::INTERNAL_SERVER_ERROR,
             message: StatusCode::INTERNAL_SERVER_ERROR.to_string(),

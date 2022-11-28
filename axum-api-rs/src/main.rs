@@ -10,12 +10,19 @@ use axum::{
 use mongodb::Client;
 use std::sync::Arc;
 
-use serde_json::{json, Value};
-
 use api::{endpoints as ep, AppState};
+use log::info;
+use serde_json::{json, Value};
+use serdeconv;
+use sloggers::{terminal::TerminalLoggerBuilder, Config, LoggerConfig};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config: LoggerConfig =
+        serdeconv::from_toml_file("axum-api-rs/log.toml").map_err(|_| "failed to open log.toml")?;
+    let logger = config.build_logger()?;
+    let _guard = sloggers::set_stdlog_logger(logger.clone())?;
+
     let app = Router::new()
         .route("/hello-world", get(get_hello_world))
         .route("/users/:id_or_email", get(ep::users::get_user))
