@@ -1,7 +1,5 @@
 use serde::Serialize;
 
-pub mod fields;
-
 #[derive(Serialize)]
 pub struct GetUser {
     pub first_name: String,

@@ -1,5 +1,25 @@
-[workspace]
-members = [
-    "axum-api-rs",
-    "tools/*",
-]
+[package]
+name = "api"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = {version="0.8.*"}
+tokio = { version = "1.46.*", features = ["full"] }
+serde = {version="1.0.*", features=["derive"]}
+serde_json = {version="1.0"}
+serde_valid = "1.0.*"
+r2d2 = "0.8.*"
+r2d2_sqlite = "0.30.0"
+rusqlite = { version = "0.36", features = [
+    "chrono",
+    "bundled",
+] } # identical to r2d2_sqlite rusqlite version, to enable chrono feature
+config = "0.15.*"
+dotenvy = "0.15.*"
+log = { version = "0.4.*" }
+env_logger = { version = "0.11.*" }
+chrono = "0.4.*"
+thiserror = "2.0"
