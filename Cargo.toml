@@ -6,20 +6,33 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-axum = {version="0.8.*"}
+axum = { version = "0.8.*", features = ["macros"] }
 tokio = { version = "1.46.*", features = ["full"] }
 serde = {version="1.0.*", features=["derive"]}
 serde_json = {version="1.0"}
 serde_valid = "1.0.*"
-r2d2 = "0.8.*"
-r2d2_sqlite = "0.30.0"
-rusqlite = { version = "0.36", features = [
-    "chrono",
-    "bundled",
-] } # identical to r2d2_sqlite rusqlite version, to enable chrono feature
 config = "0.15.*"
 dotenvy = "0.15.*"
 log = { version = "0.4.*" }
 env_logger = { version = "0.11.*" }
 chrono = "0.4.*"
 thiserror = "2.0"
+diesel-async = { version = "0.6", features = ["async-connection-wrapper", "sqlite", "r2d2", "bb8"] }
+diesel = { version = "2.2", features = ["sqlite", "r2d2", "chrono"] }
+utoipa = "5.4"
+utoipa-axum = "0.2"
+utoipa-swagger-ui = { version = "9.0", features = ["axum"] }
+reqwest = { version = "0.12", features = ["json", "blocking"] }
+url_serde = "0.2.0"
+url = { version = "2.5.4", features = ["serde"] }
+openidconnect = { version = "4.0", features = ["reqwest-blocking"] }
+anyhow = "1.0.98"
+tower-layer = "0.3.3"
+tower-sessions = { version = "0.14.0", default-features = false, features = ["axum-core"] }
+tower-service = "0.3.3"
+futures-util = "0.3.31"
+urlencoding = "2.1.3"
+#axum-oidc = "0.6.0"
+# build libsqlite3 as part of the build process
+# uncomment this line if you run into setup issues
+# libsqlite3-sys = { version = "0.30", features = ["bundled"] }

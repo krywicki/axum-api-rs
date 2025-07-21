@@ -1,43 +1,52 @@
 use std::sync::Arc;
 
 use axum::{
-    extract::{Extension, Path},
-    handler::Handler,
     http::StatusCode,
     response::{IntoResponse, Json},
-    routing::get,
-    Router,
 };
 
 mod config;
 mod db;
 mod error;
 mod handlers;
+mod middleware;
 mod routes;
 mod schemas;
 mod state;
 mod utils;
 
 use serde_json::json;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::{Config as SwaggerConfig, SwaggerUi};
+
+use crate::state::AppStateOpenApiRouter;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = config::AppConfig::init().unwrap();
     let bind_addr = config.get_bind_addr();
-    let shared_state = Arc::new(state::AppState::from_config(config));
+    let shared_state = Arc::new(state::AppState::from_config(config).await?);
 
     env_logger::init();
 
-    // build our application with a single route
-    let app = Router::new().with_state(shared_state);
-    // .route("/hello-world", get(get_hello_world))
-    // .route("/users/:id_or_email", get(get_user))
-    // .route("/users", get(get_users))
+    let (app, api): (axum::Router, utoipa::openapi::OpenApi) =
+        AppStateOpenApiRouter::with_openapi(ApiDoc::openapi())
+            .merge(routes::base::get_routes())
+            .with_state(shared_state)
+            .fallback(handler_404)
+            .split_for_parts();
 
-    let app = app.fallback(handler_404);
+    let swagger_config = SwaggerConfig::new(["/openapi.json"]).query_config_enabled(true);
+
+    let app = app.merge(
+        SwaggerUi::new("/docs")
+            .config(swagger_config)
+            .url("/openapi.json", api),
+    );
+
     let listener = tokio::net::TcpListener::bind(bind_addr.as_str()).await?;
 
-    log::info!("Serving api at http://{bind_addr}...");
+    log::info!("Serving api at http://{bind_addr} (docs @ http://{bind_addr}/docs) ...");
     axum::serve(listener, app).await.unwrap();
     Ok(())
 }
@@ -48,3 +57,7 @@ async fn handler_404() -> impl IntoResponse {
         Json(json!({"detail": StatusCode::NOT_FOUND.canonical_reason()})),
     )
 }
+
+#[derive(utoipa::OpenApi)]
+#[openapi(info(title = "API", description = "An axum based api for learning."))]
+struct ApiDoc;

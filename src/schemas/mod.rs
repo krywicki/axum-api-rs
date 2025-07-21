@@ -1,9 +1,16 @@
-use serde::Serialize;
+/// Schemas for input and output on endpoints
 
-#[derive(Serialize)]
-pub struct GetUser {
-    pub first_name: String,
-    pub last_name: String,
-    pub email: String,
-    pub id: String,
+#[derive(utoipa::ToSchema, serde::Serialize)]
+pub struct Health {
+    pub status: &'static str,
+}
+
+#[derive(utoipa::ToSchema, serde::Deserialize)]
+pub struct OAuth2CodeGrantParams {
+    pub code: String,
+}
+
+#[derive(utoipa::ToSchema, serde::Deserialize)]
+pub struct OAuth2TokensBody {
+    pub access_token: String,
 }
